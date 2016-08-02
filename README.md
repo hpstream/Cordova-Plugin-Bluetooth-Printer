@@ -82,15 +82,3 @@ BTPrinter.print((function(data){
 ```
 
 
-POS printing
-
-```
-BTPrinter.printPOSCommand((function(data){
-    console.log("Success");
-    console.log(data)
-},function(err){
-    console.log("Error");
-    console.log(err)
-}, "0C")
-//OC is a POS command for page feed
-```
