@@ -38,7 +38,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
 	@Override
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-		if (action.equals("list")) {
+            if (action.equals("open")) {
+			openBT(callbackContext);
+			return true;
+		}else if (action.equals("list")) {
 			listBT(callbackContext);
 			return true;
 		} else if (action.equals("connect")) {
@@ -85,7 +88,21 @@ public class BluetoothPrinter extends CordovaPlugin {
 		}
 		return false;
 	}
-
+        void openBT(CallbackContext callbackContext){
+            BluetoothAdapter mBluetoothAdapter = null;
+		String errMsg = null;
+            mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+			if (mBluetoothAdapter == null) {
+				errMsg = "No bluetooth adapter available";
+				Log.e(LOG_TAG, errMsg);
+				callbackContext.error(errMsg);
+				return;
+			}
+			if (!mBluetoothAdapter.isEnabled()) {
+				Intent enableBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+				this.cordova.getActivity().startActivityForResult(enableBluetooth, 0);
+			}
+        }
     //This will return the array list of paired bluetooth printers
 	void listBT(CallbackContext callbackContext) {
 		BluetoothAdapter mBluetoothAdapter = null;
@@ -233,8 +250,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 
 	//This will send data to bluetooth printer
 	boolean print(CallbackContext callbackContext, String msg) throws IOException {
-		try {
-
+		try {                       
 			mmOutputStream.write(msg.getBytes());
 
 			// tell the user data were sent
