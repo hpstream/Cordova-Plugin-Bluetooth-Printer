@@ -33,7 +33,27 @@ public class BluetoothPrinter extends CordovaPlugin {
 	int readBufferPosition;
 	int counter;
 	volatile boolean stopWorker;
+         public static final byte[][] byteCommands = { 
+    		{ 0x1b, 0x40 },// 复位打印机    
+    		{ 0x0A, 0x0A },// 打印并换行
+    		
+                { 0x1d, 0x21, 0x00 },// 字体不放大    
+                { 0x1d, 0x21, 0x02 },// 宽高加倍    
+                { 0x1d, 0x21, 0x11 },// 宽高加倍    
 
+                {  0x1B, 0x61, 0 },// 左对齐
+                {  0x1B, 0x61, 1 },// 居中对齐
+                {  0x1B, 0x61, 2 },// 右对齐
+
+                { 0x1b, 0x45, 0x00 },// 取消加粗模式
+                { 0x1b, 0x45, 0x01 },// 选择加粗模式
+                { 0x1b, 0x7b, 0x00 },// 取消倒置打印
+                { 0x1b, 0x7b, 0x01 },// 选择倒置打印
+                { 0x1d, 0x42, 0x00 },// 取消黑白反显
+                { 0x1d, 0x42, 0x01 },// 选择黑白反显
+                { 0x1b, 0x56, 0x00 },// 取消顺时针旋转90°
+                { 0x1b, 0x56, 0x01 },// 选择顺时针旋转90°      
+    };
 	public BluetoothPrinter() {}
 
 	@Override
@@ -78,8 +98,8 @@ public class BluetoothPrinter extends CordovaPlugin {
 		}
         else if (action.equals("printPOSCommand")) {
 			try {
-				String msg = args.getString(0);
-                printPOSCommand(callbackContext, hexStringToBytes(msg));
+				int command = args.getInt(0);
+                printPOSCommand(callbackContext, command);
 			} catch (IOException e) {
 				Log.e(LOG_TAG, e.getMessage());
 				e.printStackTrace();
@@ -165,7 +185,7 @@ public class BluetoothPrinter extends CordovaPlugin {
 					}
 				}
 			}
-			Log.d(LOG_TAG, "Bluetooth Device Found: " + mmDevice.getName());
+			Log.d(LOG_TAG, "Bluetooth Device Found1: " + mmDevice.getName());
 		} catch (Exception e) {
 			String errMsg = e.getMessage();
 			Log.e(LOG_TAG, errMsg);
@@ -250,8 +270,10 @@ public class BluetoothPrinter extends CordovaPlugin {
 
 	//This will send data to bluetooth printer
 	boolean print(CallbackContext callbackContext, String msg) throws IOException {
-		try {                       
-			mmOutputStream.write(msg.getBytes());
+		try {       
+                   
+                        byte[] send=getText(msg);
+			mmOutputStream.write(send);
 
 			// tell the user data were sent
 			//Log.d(LOG_TAG, "Data Sent");
@@ -266,9 +288,9 @@ public class BluetoothPrinter extends CordovaPlugin {
 		return false;
 	}
 
-    boolean printPOSCommand(CallbackContext callbackContext, byte[] buffer) throws IOException {
+    boolean printPOSCommand(CallbackContext callbackContext,int command) throws IOException {
         try {
-            mmOutputStream.write(buffer);
+            mmOutputStream.write(byteCommands[command]);
             // tell the user data were sent
 			Log.d(LOG_TAG, "Data Sent");
             callbackContext.success("Data Sent");
@@ -326,5 +348,5 @@ public class BluetoothPrinter extends CordovaPlugin {
     private static byte charToByte(char c) {
 		return (byte) "0123456789abcdef".indexOf(c);
 	}
-
+ 
 }

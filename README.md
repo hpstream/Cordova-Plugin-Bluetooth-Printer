@@ -94,7 +94,7 @@ BTPrinter.print((function(data){
 
                 { 0x1b, 0x45, 0x00 },// 8.取消加粗模式
                 { 0x1b, 0x45, 0x01 },// 9.选择加粗模式
-Print simple printPOSCommand
+simple printPOSCommand
 
 ```
 BTPrinter.printPOSCommand(function(success){
